@@ -6,6 +6,8 @@ Essa rede será responsável pela comunicação dos containers de toda arquitetu
 ```shell
 docker network create mongo-shard
 ```
+
+
 # Criar Containers ConfigServers.
 Esses containers serão o responsaveis por armazenar os metadados do cluster sharded, como mapeamento de chunks para shards e configuração de balanceamento de carga.
 ```shell
@@ -15,8 +17,10 @@ docker run --name mongo-config03 --net mongo-shard -d mongo mongod --configsvr -
 ```
 ![imagem](https://github.com/JonathanWillian5/MongoDB/assets/89879087/83adfee0-8629-429f-9378-103c2e3e3306)
 
+
 # Configurar Replica Set ConfigServers
-Essa configuração será responsável por inicializar um conjunto de réplicas para os ConfigServers em um clusters de sharding no MongoDB.
+Nesta etapa, vamos configurar os servidores de configuração para o nosso cluster de sharding do MongoDB. 
+Esses servidores são essenciais, pois armazenam metadados sobre a estrutura do cluster, incluindo a distribuição dos dados entre os shards e o estado atual do cluster.
 ```shell
 docker exec -it mongo-config01 mongo
 ```
@@ -36,9 +40,10 @@ rs.initiate(
 ```
 ![d4119714-fc2d-4e93-bf0a-e13c66bbb85b](https://github.com/JonathanWillian5/MongoDB/assets/89879087/2b9f03f9-f8e3-4e7c-976c-bada8dc9ed97)
 
-# Criar 3 shards.
-Para essa etapa vamos criar três shards em que cada um possui uma réplica. Dessa forma estaremos estabelecendo o conceito de redundancia. 
-Os Shards são responáveis pelo armazenamento dos dados.
+
+# Criar Containers Shards.
+Para esta etapa, vamos configurar três containers que atuaram como shards, cada shards composto por dois nós para formar um conjunto de réplicas. 
+Os shards são responsáveis pelo armazenamento distribuído dos dados, ajudando a escalar horizontalmente o banco de dados.
 - Shard01
 ```shell
 docker run --name mongo-shard1a --net mongo-shard -d mongo mongod --port 27018 --shardsvr --replSet shard01
@@ -56,8 +61,9 @@ docker run --name mongo-shard3b --net mongo-shard -d mongo mongod --port 27020 -
 ```
 ![85436b4a-d3ee-4f14-a1b9-39226309e9d0](https://github.com/JonathanWillian5/MongoDB/assets/89879087/71383870-5005-42b1-95bb-a39fdd96f488)
 
-# Configurar Repleca Set Shards.
-Essas configurações serão responsáveis por inicializar conjuntos de réplicas para cada shard no cluster de sharding no MongoDB.
+
+# Configurar Réplica Set Shards.
+Essas configurações serão responsáveis por inicializar conjuntos de réplicas para cada shard no cluster de sharding.
 - Shard01
 ```shell
 docker exec -it mongo-shard1a mongo --port 27018
@@ -110,7 +116,8 @@ rs.initiate(
 ```
 ![bbb26b4f-067b-4ee6-b288-7edb15f4da06](https://github.com/JonathanWillian5/MongoDB/assets/89879087/72974b5b-7c1c-4e1b-bd85-4deb9885e3a9)
 
-# Configuração do roteador.
+
+# Configuração Roteador.
 Nessa etapa iremos criar um container que executa um roteador (mongos) que é o rotedor de sharding do MongoDB.
 ```shell
 docker run -p 27017:27017 --name mongo-router --net mongo-shard -d mongo mongos --port 27017 --configdb 
@@ -118,8 +125,10 @@ configserver/mongo-config01:27017,mongo-config02:27017,mongo-config03:27017 --bi
 ```
 ![b6c77739-ffe1-4259-afbb-40b1818d34fe](https://github.com/JonathanWillian5/MongoDB/assets/89879087/7e8c09bd-2fe5-41db-bfd2-502a777981bd)
 
-# Configurar roteador para reconhecer os shards disponível.
-Nessa etapa iremos criar três clusters de sharding, em cada cluster teremos dois shards.
+
+# Congiguração Cluster Sharding
+Nesta etapa, vamos configurar um cluster de sharding no MongoDB, composto por três shards. 
+Cada shard é formado por um conjunto de réplicas para garantir redundância e alta disponibilidade.
 ```shell
 docker exec -it mongo-router mongo
 sh.addShard("shard01/mongo-shard1a:27018")
