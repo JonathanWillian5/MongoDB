@@ -1,12 +1,12 @@
 
 
 
-# Criar uma rede para a comunicação entre os containers.
+# Criar Rede para a Comunicação entre os containers.
 Essa rede será responsável pela comunicação dos containers de toda arquitetura.
 ```shell
 docker network create mongo-shard
 ```
-# Criar os containers ConfigServers.
+# Criar Containers ConfigServers.
 Esses containers serão o responsaveis por armazenar os metadados do cluster sharded, como mapeamento de chunks para shards e configuração de balanceamento de carga.
 ```shell
 docker run --name mongo-config01 --net mongo-shard -d mongo mongod --configsvr --replSet configserver --port 27017
@@ -15,7 +15,7 @@ docker run --name mongo-config03 --net mongo-shard -d mongo mongod --configsvr -
 ```
 ![imagem](https://github.com/JonathanWillian5/MongoDB/assets/89879087/83adfee0-8629-429f-9378-103c2e3e3306)
 
-# Configurar containers.
+# Configurar Replica Set ConfigServers
 Essa configuração será responsável por inicializar um conjunto de réplicas para os ConfigServers em um clusters de sharding no MongoDB.
 ```shell
 docker exec -it mongo-config01 mongo
@@ -56,8 +56,8 @@ docker run --name mongo-shard3b --net mongo-shard -d mongo mongod --port 27020 -
 ```
 ![85436b4a-d3ee-4f14-a1b9-39226309e9d0](https://github.com/JonathanWillian5/MongoDB/assets/89879087/71383870-5005-42b1-95bb-a39fdd96f488)
 
-# Configurar os 3 shards.
-Essa configuração será responsável por inicializar um conjunto de réplicas para os Shards em três clusters de sharding no MongoDB.
+# Configurar Repleca Set Shards.
+Essas configurações serão responsáveis por inicializar conjuntos de réplicas para cada shard no cluster de sharding no MongoDB.
 - Shard01
 ```shell
 docker exec -it mongo-shard1a mongo --port 27018
@@ -111,7 +111,7 @@ rs.initiate(
 ![bbb26b4f-067b-4ee6-b288-7edb15f4da06](https://github.com/JonathanWillian5/MongoDB/assets/89879087/72974b5b-7c1c-4e1b-bd85-4deb9885e3a9)
 
 # Configuração do roteador.
-Nessa etapa iremos criar um container que executa um roteador (mongos) que é o retedor de sharding do MongoDB.
+Nessa etapa iremos criar um container que executa um roteador (mongos) que é o rotedor de sharding do MongoDB.
 ```shell
 docker run -p 27017:27017 --name mongo-router --net mongo-shard -d mongo mongos --port 27017 --configdb 
 configserver/mongo-config01:27017,mongo-config02:27017,mongo-config03:27017 --bind_ip_all
