@@ -161,9 +161,33 @@ sh.addShard("shard03/mongo-shard3b:27020")
 ```
 ![173bceea-9a42-4789-895d-f7ff96f32697](https://github.com/JonathanWillian5/MongoDB/assets/89879087/a1a3f32e-07c5-4072-9791-555ef346c5da)
 
-> Criação do banco e distribuição entre os shards
+## Criação do banco e distribuição entre os shards
+> Nessa etapa estamos criando o banco de dados que se chama supermercado, criando um collection para os produtos e uma collection para filiais, o mesmo comando de criação das collections gera um indice para ambas.<br />
+ - Para colletion produtos criamos um index do tipo hashed na chave ID.<br />
+ - Para a collection filiais criamos um index do tipo hashed na chave document.<br />
 
-![05bb30c8-d900-46c1-a8bb-6e9ea2a650d5](https://github.com/JonathanWillian5/MongoDB/assets/89879087/2109e75e-e4e2-4242-bd88-a5c6ce7f2ef0)
+```shell
+use supermercados
+db.produtos.createIndex({"id": "hashed"})
+db.filiais.createIndex({"document": "hashed"})
+```
+
+![b7df2d6a-36e2-44ef-b874-ae8b9bebcce1](https://github.com/JonathanWillian5/MongoDB/assets/89879087/d186eae6-f955-42c8-b9d4-ca2bc2dcd875)
+
+> Criamos as fragmentações nas duas collection (produto, filiais)
+  - Para colletion produtos criamos um shard do tipo hashed na chave ID.<br />
+  - Para a collection filiais criamos um shard do tipo hashed na chave document.<br />
+
+> **Note:** O tipo hashed na fragmentação fica responsável pela distribuição uniforme dos dados entre os shards.<br/>
+> **Note:** É preciso criar um index na chave a ser fragmentada para conseguir fazer a criação do shard.
+
+```shell
+sh.shardCollection("supermercados.produtos", {"id": "hashed})
+sh.shardCollection("supermercados.filiais", {"document": "hashed})
+```
+   
+![7d408e3a-842b-462d-a9fd-6c74cf8f9fb3](https://github.com/JonathanWillian5/MongoDB/assets/89879087/a3a4719a-d629-426d-be01-b8a4ebb36320)
+
 
 # Simulação
 ## Implementação da estratégia de particionamento
@@ -183,12 +207,27 @@ Na imagem acima é possível ver a distribuição realizada entre os shards na c
 
 # Teste de funcionamento e desempenho do ambiente
 
-> Desempenho:
-Utilizamos a ferramneta python a fim de cansar o sistema o
+> **Desempenho:**<br/>
+Para nosso teste de estresse utilizamos um código python, para realizar multiplas consultas, inserções e updates dentro do ambiente.
 
-> Consulta:
+![f9e13947-e665-4b85-9beb-15b43e5fe7b6](https://github.com/JonathanWillian5/MongoDB/assets/89879087/3f2d36c5-875d-4b3e-9526-ad5ac7f5d6ac)
 
-> Atualizações:
 
-> Adição:
+>Na imagem abaixo, podemos visualizar como o ambiente se comportou durante as operações realizadas acima.
+
+MONGO:<br/>
+![f88df407-7459-43b4-9ffe-a2c7f9cc6ca1](https://github.com/JonathanWillian5/MongoDB/assets/89879087/8c95e7dc-0979-466a-b0b2-5118eff3e895)<br/>
+CONTAINERS:<br/>
+![ff435965-754f-4a4d-aaf6-6d73c9306806](https://github.com/JonathanWillian5/MongoDB/assets/89879087/1a21eef5-85a9-49dc-b8bb-64316a97cbd4)
+
+> **Consulta:**<br/>
+Consulta buscando a quantidade do estoque de uma filial.<br/>
+
+
+> **Atualizações:**<br/>
+Atualização realizando a alteração do inventário de uma filial.<br/>
+
+
+> **Adição:**<br/>
+Realizando a inserlçao de uma filial.<br/>
 
