@@ -1,15 +1,36 @@
+# Projeto: Sistema de Gerenciamento de Estoque para Cadeia de Supermercados
 
+## Visão Geral:
+> Este projeto visa desenvolver um sistema de gerenciamento de estoque para uma cadeia de supermercados que possui filiais em diferentes cidades. O sistema será baseado em MongoDB para armazenamento de dados, visando atender aos requisitos de escalabilidade e desempenho.
 
+## Justificativas das Escolhas:
 
-# Criar Rede para a Comunicação entre os containers.
-Essa rede será responsável pela comunicação dos containers de toda arquitetura.
+ - ### MongoDB:
+   Optamos pelo MongoDB devido à sua capacidade de escalabilidade horizontal e desempenho em ambientes com grande volume de dados. Sua flexibilidade de esquema também permite uma modelagem eficiente dos dados de estoque.
+
+ - ### Sharding:
+   Implementaremos o sharding para distribuir os dados de estoque entre os servidores do cluster, possibilitando o crescimento do sistema conforme novas filiais são adicionadas.
+
+ - ### Índices Eficientes:
+   Utilizaremos índices compostos para acelerar as consultas de estoque, incluindo campos como o filial_document e o ID do produto. Isso garantirá a eficiência das operações de busca e atualização.
+
+ - ### Replicação:
+   Implementaremos a replicação para garantir alta disponibilidade e tolerância a falhas. O banco terá um conjunto de réplicas para assegurar que os dados estejam sempre disponíveis.
+
+ - ### Particionamento de Dados:
+   Além do sharding, consideraremos o particionamento de dados com base em critérios como criação de chave hashed no nome da filial para otimizar a distribuição dos dados entre os shards.
+
+# Configuração do ambiente em MongoDB
+
+## Criar Rede para a Comunicação entre os containers.
+> Essa rede será responsável pela comunicação dos containers de toda arquitetura.
 ```shell
 docker network create mongo-shard
 ```
 
 
-# Criar Containers ConfigServers.
-Esses containers serão o responsaveis por armazenar os metadados do cluster sharded, como mapeamento de chunks para shards e configuração de balanceamento de carga.
+## Criar Containers ConfigServers.
+> Esses containers serão o responsaveis por armazenar os metadados do cluster sharded, como mapeamento de chunks para shards e configuração de balanceamento de carga.
 ```shell
 docker run --name mongo-config01 --net mongo-shard -d mongo mongod --configsvr --replSet configserver --port 27017
 docker run --name mongo-config02 --net mongo-shard -d mongo mongod --configsvr --replSet configserver --port 27017
@@ -18,8 +39,8 @@ docker run --name mongo-config03 --net mongo-shard -d mongo mongod --configsvr -
 ![imagem](https://github.com/JonathanWillian5/MongoDB/assets/89879087/83adfee0-8629-429f-9378-103c2e3e3306)
 
 
-# Configurar Replica Set ConfigServers
-Nesta etapa, vamos configurar os servidores de configuração para o nosso cluster de sharding do MongoDB. 
+## Configurar Replica Set ConfigServers
+> Nesta etapa, vamos configurar os servidores de configuração para o nosso cluster de sharding do MongoDB. 
 Esses servidores são essenciais, pois armazenam metadados sobre a estrutura do cluster, incluindo a distribuição dos dados entre os shards e o estado atual do cluster.
 ```shell
 docker exec -it mongo-config01 mongo
@@ -41,8 +62,8 @@ rs.initiate(
 ![d4119714-fc2d-4e93-bf0a-e13c66bbb85b](https://github.com/JonathanWillian5/MongoDB/assets/89879087/2b9f03f9-f8e3-4e7c-976c-bada8dc9ed97)
 
 
-# Criar Containers Shards.
-Para esta etapa, vamos configurar três containers que atuaram como shards, cada shards composto por dois nós para formar um conjunto de réplicas. 
+## Criar Containers Shards.
+> Para esta etapa, vamos configurar três containers que atuaram como shards, cada shards composto por dois nós para formar um conjunto de réplicas. 
 Os shards são responsáveis pelo armazenamento distribuído dos dados, ajudando a escalar horizontalmente o banco de dados.
 - Shard01
 ```shell
@@ -62,8 +83,8 @@ docker run --name mongo-shard3b --net mongo-shard -d mongo mongod --port 27020 -
 ![85436b4a-d3ee-4f14-a1b9-39226309e9d0](https://github.com/JonathanWillian5/MongoDB/assets/89879087/71383870-5005-42b1-95bb-a39fdd96f488)
 
 
-# Configurar Réplica Set Shards.
-Essas configurações serão responsáveis por inicializar conjuntos de réplicas para cada shard no cluster de sharding.
+## Configurar Réplica Set Shards.
+> Essas configurações serão responsáveis por inicializar conjuntos de réplicas para cada shard no cluster de sharding.
 - Shard01
 ```shell
 docker exec -it mongo-shard1a mongo --port 27018
@@ -117,8 +138,8 @@ rs.initiate(
 ![bbb26b4f-067b-4ee6-b288-7edb15f4da06](https://github.com/JonathanWillian5/MongoDB/assets/89879087/72974b5b-7c1c-4e1b-bd85-4deb9885e3a9)
 
 
-# Configuração Roteador.
-Nessa etapa iremos criar um container que executa um roteador (mongos) que é o rotedor de sharding do MongoDB.
+## Configuração Roteador.
+> Nessa etapa iremos criar um container que executa um roteador (mongos) que é o rotedor de sharding do MongoDB.
 ```shell
 docker run -p 27017:27017 --name mongo-router --net mongo-shard -d mongo mongos --port 27017 --configdb 
 configserver/mongo-config01:27017,mongo-config02:27017,mongo-config03:27017 --bind_ip_all
@@ -126,21 +147,48 @@ configserver/mongo-config01:27017,mongo-config02:27017,mongo-config03:27017 --bi
 ![b6c77739-ffe1-4259-afbb-40b1818d34fe](https://github.com/JonathanWillian5/MongoDB/assets/89879087/7e8c09bd-2fe5-41db-bfd2-502a777981bd)
 
 
-# Congiguração Cluster Sharding
-Nesta etapa, vamos configurar um cluster de sharding no MongoDB, composto por três shards. 
+## Configuração Cluster Sharding
+> Nesta etapa, vamos configurar um cluster de sharding no MongoDB, composto por três shards. 
 Cada shard é formado por um conjunto de réplicas para garantir redundância e alta disponibilidade.
 ```shell
 docker exec -it mongo-router mongo
 sh.addShard("shard01/mongo-shard1a:27018")
 sh.addShard("shard01/mongo-shard1b:27018") 
 sh.addShard("shard02/mongo-shard2a:27019")
-sh.addShard("shard02/mongo-shard2b:27019") 
+sh.addShard("shard02/mongo-shard2b:27019")    
 sh.addShard("shard03/mongo-shard3a:27020")
 sh.addShard("shard03/mongo-shard3b:27020")
 ```
 ![173bceea-9a42-4789-895d-f7ff96f32697](https://github.com/JonathanWillian5/MongoDB/assets/89879087/a1a3f32e-07c5-4072-9791-555ef346c5da)
 
+> Criação do banco e distribuição entre os shards
 
+![05bb30c8-d900-46c1-a8bb-6e9ea2a650d5](https://github.com/JonathanWillian5/MongoDB/assets/89879087/2109e75e-e4e2-4242-bd88-a5c6ce7f2ef0)
 
+# Simulação
+## Implementação da estratégia de particionamento
+> Com isso é possível garantir uma distribuição balanceada e reduzir a sobrecarga do banco de dados e proporcionar um maior isolamento e segurança dos dados.
+Para nossa estratégica adotamos o método de particionamento horizontal e por fragmentação.
+ - Vantagens particionamento horizontal e fragmentado:
+   
+   1 - Escalabilidade: Permite que o banco de dados cresça horizontalmente, adicionando mais servidores para acomodar o aumento de dados e carga de trabalho.
+   
+   2 - Desempenho: Melhora o desempenho ao reduzir a quantidade de dados que cada consulta precisa processar. Isso é especialmente útil em grandes bancos de dados.
+   
+   3 - Gerenciamento de Dados: Facilita o gerenciamento e manutenção dos dados, como backup e recuperação, pois cada partição pode ser tratada separadamente.
 
+![79760ea9-4b40-4588-bac2-644a8ccd8d03](https://github.com/JonathanWillian5/MongoDB/assets/89879087/36b7c18a-0ffc-4199-aae2-d2bb986dc8fd)
+
+Na imagem acima é possível ver a distribuição realizada entre os shards na colletions produtos utilizando a estratégia de fragmentação se baseando no hashed da chave ID.
+
+# Teste de funcionamento e desempenho do ambiente
+
+> Desempenho:
+Utilizamos a ferramneta python a fim de cansar o sistema o
+
+> Consulta:
+
+> Atualizações:
+
+> Adição:
 
