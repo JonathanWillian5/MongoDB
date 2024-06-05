@@ -159,10 +159,10 @@ sh.addShard("shard02/mongo-shard2b:27019")
 sh.addShard("shard03/mongo-shard3a:27020")
 sh.addShard("shard03/mongo-shard3b:27020")
 ```
-![173bceea-9a42-4789-895d-f7ff96f32697](https://github.com/JonathanWillian5/MongoDB/assets/89879087/a1a3f32e-07c5-4072-9791-555ef346c5da)
+![image](https://github.com/JonathanWillian5/MongoDB/assets/83048005/56d9aee2-f949-4012-98d7-8f1129c5e676)
 
-## Criação do banco e distribuição entre os shards
-> Nessa etapa estamos criando o banco de dados que se chama supermercado, criando um collection para os produtos e uma collection para filiais, o mesmo comando de criação das collections gera um indice para ambas.<br />
+## Criação do Banco e Distribuição Entre os Shards
+> Nessa etapa estamos criando o banco de dados que se chama supermercados, criando uma collection para os produtos e uma collection para filiais, o mesmo comando de criação das collections gera um indice para ambas.<br />
  - Para colletion produtos criamos um index do tipo hashed na chave ID.<br />
  - Para a collection filiais criamos um index do tipo hashed na chave document.<br />
 
@@ -172,9 +172,10 @@ db.produtos.createIndex({"id": "hashed"})
 db.filiais.createIndex({"document": "hashed"})
 ```
 
-![b7df2d6a-36e2-44ef-b874-ae8b9bebcce1](https://github.com/JonathanWillian5/MongoDB/assets/89879087/d186eae6-f955-42c8-b9d4-ca2bc2dcd875)
+![image](https://github.com/JonathanWillian5/MongoDB/assets/83048005/93aa796b-850a-4473-9bc7-470dca62fa82)
 
-> Criamos as fragmentações nas duas collection (produto, filiais)
+
+> Criando as Fragmentações nas duas Collection (produto, filiais)
   - Para colletion produtos criamos um shard do tipo hashed na chave ID.<br />
   - Para a collection filiais criamos um shard do tipo hashed na chave document.<br />
 
@@ -182,8 +183,8 @@ db.filiais.createIndex({"document": "hashed"})
 > **Note:** É preciso criar um index na chave a ser fragmentada para conseguir fazer a criação do shard.
 
 ```shell
-sh.shardCollection("supermercados.produtos", {"id": "hashed})
-sh.shardCollection("supermercados.filiais", {"document": "hashed})
+sh.shardCollection("supermercados.produtos", {"id": "hashed"})
+sh.shardCollection("supermercados.filiais", {"document": "hashed"})
 ```
    
 ![7d408e3a-842b-462d-a9fd-6c74cf8f9fb3](https://github.com/JonathanWillian5/MongoDB/assets/89879087/a3a4719a-d629-426d-be01-b8a4ebb36320)
@@ -201,36 +202,36 @@ Para nossa estratégica adotamos o método de particionamento horizontal e por f
    
    3 - Gerenciamento de Dados: Facilita o gerenciamento e manutenção dos dados, como backup e recuperação, pois cada partição pode ser tratada separadamente.
 
-![79760ea9-4b40-4588-bac2-644a8ccd8d03](https://github.com/JonathanWillian5/MongoDB/assets/89879087/36b7c18a-0ffc-4199-aae2-d2bb986dc8fd)
+![image](https://github.com/JonathanWillian5/MongoDB/assets/83048005/23187618-468c-4b40-9824-96708a835362)
+
 
 Na imagem acima é possível ver a distribuição realizada entre os shards na colletions produtos utilizando a estratégia de fragmentação se baseando no hashed da chave ID.
 
-# Teste de funcionamento e desempenho do ambiente
+# Teste de Funcionamento e Desempenho do Ambiente
 
 > **Desempenho:**<br/>
 Para nosso teste de estresse utilizamos um código python, para realizar multiplas consultas, inserções e updates dentro do ambiente.
 
-![f9e13947-e665-4b85-9beb-15b43e5fe7b6](https://github.com/JonathanWillian5/MongoDB/assets/89879087/3f2d36c5-875d-4b3e-9526-ad5ac7f5d6ac)
-
+![image](https://github.com/JonathanWillian5/MongoDB/assets/83048005/acb2b111-9bd0-47af-bb31-7066defd85ed)
 
 >Na imagem abaixo, podemos visualizar como o ambiente se comportou durante as operações realizadas acima.
 
 MONGO:<br/>
-![f88df407-7459-43b4-9ffe-a2c7f9cc6ca1](https://github.com/JonathanWillian5/MongoDB/assets/89879087/8c95e7dc-0979-466a-b0b2-5118eff3e895)<br/>
+![image](https://github.com/JonathanWillian5/MongoDB/assets/83048005/6f713c6e-b2ec-4362-896c-0b2e41f07286)<br/>
 CONTAINERS:<br/>
-![ff435965-754f-4a4d-aaf6-6d73c9306806](https://github.com/JonathanWillian5/MongoDB/assets/89879087/1a21eef5-85a9-49dc-b8bb-64316a97cbd4)
+![image](https://github.com/JonathanWillian5/MongoDB/assets/83048005/8c6ab08f-f123-4a72-b085-5bb282bab7e1)
 
-> **Consulta:**<br/>
+**Consulta:**<br/>
 Consulta buscando as informações sobre o estoque de algumas filiais.<br/>
 
 ![b3a8098a-5b62-486e-a940-be6b530e97c0](https://github.com/JonathanWillian5/MongoDB/assets/89879087/d76988bd-49f6-4800-a5e3-48eeb24882c4)
 
-> **Atualizações:**<br/>
+**Atualizações:**<br/>
 Atualização realizando a alteração da quantidade do inventário de ulgumas filiais.<br/>
 
 ![c6c0b856-8cac-4097-8108-a715a814713d](https://github.com/JonathanWillian5/MongoDB/assets/89879087/b4682db7-49b6-4dfc-9f13-25f793808632)
 
-> **Adição:**<br/>
+**Adição:**<br/>
 Realizando a inserçao de novas filiais.<br/>
 
 ![9d4a6820-a147-46f9-a6f3-c54c5086f7e3](https://github.com/JonathanWillian5/MongoDB/assets/89879087/98552c52-e008-478e-a83b-d6798e1d718d)
