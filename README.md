@@ -221,13 +221,19 @@ CONTAINERS:<br/>
 ![ff435965-754f-4a4d-aaf6-6d73c9306806](https://github.com/JonathanWillian5/MongoDB/assets/89879087/1a21eef5-85a9-49dc-b8bb-64316a97cbd4)
 
 > **Consulta:**<br/>
-Consulta buscando a quantidade do estoque de uma filial.<br/>
+Consulta buscando as informações sobre o estoque de algumas filiais.<br/>
 
+![b3a8098a-5b62-486e-a940-be6b530e97c0](https://github.com/JonathanWillian5/MongoDB/assets/89879087/d76988bd-49f6-4800-a5e3-48eeb24882c4)
 
 > **Atualizações:**<br/>
-Atualização realizando a alteração do inventário de uma filial.<br/>
+Atualização realizando a alteração do inventário de uma filial especifica.<br/>
 
+![c6c0b856-8cac-4097-8108-a715a814713d](https://github.com/JonathanWillian5/MongoDB/assets/89879087/b4682db7-49b6-4dfc-9f13-25f793808632)
 
 > **Adição:**<br/>
-Realizando a inserlçao de uma filial.<br/>
+Realizando a inserlçao de novas filiais.<br/>
+
+![9d4a6820-a147-46f9-a6f3-c54c5086f7e3](https://github.com/JonathanWillian5/MongoDB/assets/89879087/98552c52-e008-478e-a83b-d6798e1d718d)
+
+
 
